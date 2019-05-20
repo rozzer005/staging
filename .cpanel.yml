@@ -1,5 +1,5 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/user/repositories/staging
+    - export DEPLOYPATH=/home/ltrabnhnfmlr/repositories/staging
     - /bin/cp * $DEPLOYPATH
