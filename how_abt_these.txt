@@ -1,0 +1,83 @@
+$(document).ready(function(){
+	var dec = "declined";
+	var auth = "authorize";
+	$(".post-type-shop_order .wp-list-table tbody#the-list tr").each(function(){
+		var text_status = $(this).find(".approval_status.column-approval_status").text().toLowerCase();
+		console.log(text_status);
+		var approval_status = text_status.trim();
+		if(approval_status.indexOf(auth) != -1){
+			$(this).closest('tr').css("background-color","#03ff03");
+		}else if(approval_status.indexOf(dec) != -1){
+			$(this).closest('tr').css("background-color","red");
+		}else{
+			$(this).closest('tr').css("background-color","yellow");
+		}
+	});
+	
+	$("select#order_status").change(function(){
+		// alert('called');
+		var selected_val = $(this).val();
+		var strval = 'wc-asg_';
+		var strauth = 'wc-auth_';
+		var strdec = 'wc-dec_';
+		var new_stat = selected_val.split('wc-').pop();
+		if(selected_val.indexOf(strval) != -1){
+			$("input#doctor_selected_asg").attr("value",new_stat);
+		}else{
+			console.log(selected_val.indexOf(strval));
+		}
+		
+		if(selected_val.indexOf(strauth) != -1 || selected_val.indexOf(strdec) != -1 ){
+			// $("label.display_doc_decision").text(new_stat);
+			$("input#doctor_decision").attr("value",new_stat); 
+		}else{
+			console.log(selected_val.indexOf(strval));
+		}
+		
+	});	
+	setTimeout(function(){
+		$("body").find("input[name='prflxtrflds_user_field_value[1]']").hide();
+		$.get(ajaxurl,{'action': 'turtle_get_all_prescription_templates'}, 
+			function (alloptions) { 
+				$("body").find("table.form-table.prflxtrflds_table").append(alloptions);
+				$("body").find("input[name='prflxtrflds_user_field_value[1]']").after('<input type="text" id="display_template_assigned" value="not assigned" readonly />');
+			});
+			$.get(ajaxurl,{'action': 'woo_get_print_template'}, 
+			function (templatererurn) { 
+			// alert(templatererurn);
+			var a = $(templatererurn).find(".prescription_template").attr('data-attr-temp');
+			//alert(a);
+			//$("div#rniotb-invoice-meta select").val(a).change();
+			$('div#rniotb-invoice-meta select').find('option[value="'+a+'"]').attr("selected",true);
+			var template_id = '&invoice_id='+a;
+			var base_url_temp = $('#prescription_print').attr('href');
+			var complete_print_url = base_url_temp+template_id;
+			$('#prescription_print').attr('href', complete_print_url);
+			$('div#rniotb-invoice-meta select').find('option[value="'+a+'"]').trigger('change');
+				// $("body").find("table.form-table.prflxtrflds_table").append(alloptions);
+				// $("body").find("input[name='prflxtrflds_user_field_value[1]']").after('<input type="text" id="display_template_assigned" value="not assigned" readonly />');
+			});
+	},3500);
+	setTimeout(function(){
+		$("body").find('select#doc_temp_list').change( function(){
+			var optionSelected = $("option:selected", this);
+			var valueSelected = this.value;
+			var textSelected = optionSelected.text();
+			$("body").find("input[name='prflxtrflds_user_field_value[1]']").val(valueSelected);
+			$("#display_template_assigned").val(textSelected);
+		});
+	},5000);
+	setTimeout(function(){
+		var initval = $("body").find("input[name='prflxtrflds_user_field_value[1]']").val();
+		if( initval ){
+			var optionText = $('select#doc_temp_list option[value="'+initval+'"]').text();
+			$('input#display_template_assigned').val(optionText);
+		}	
+	
+	
+	},5500);
+	$('#prescription_email').click(function(){
+		$("button[title='Email']").trigger('click');
+	});
+	
+});
